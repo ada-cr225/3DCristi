@@ -1,0 +1,238 @@
+/* Reset & Base */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Removed the old light grey background-color */
+  color: #ffffff; /* Text color changed to white for contrast */
+}
+
+* {
+  box-sizing: border-box; /* This prevents the header from being wider than the screen */
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  
+  /* --- YOUR NEW BACKGROUND --- */
+  background-image: radial-gradient(circle at 50% 0%, #3B3B3B, #070B11);
+  
+  /* Crucial for gradients: ensure it covers the whole phone screen */
+  min-height: 100vh; 
+  background-attachment: fixed; /* Prevents the gradient from scrolling with the list */
+}
+
+
+.header {
+  height: 64px;
+  width: 100%;
+  background-color: #000;
+  
+  /* Fixed to viewport */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  
+  /* We keep Flexbox ONLY to vertically align the Logo on the left */
+  display: flex;
+  align-items: center;
+  padding-left: 22px; /* Matches the 'right' spacing of the icons */
+  
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* THE GRID LAYOUT */
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 170px);
+  
+  /* This ensures items stick to the LEFT side */
+  justify-content: start; 
+  
+  gap: 20px;
+  width: 100%;
+}
+
+/* SHARED CARD STYLES */
+.card {
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  
+  /* Card Background: 
+     Since your main background is dark, let's make the cards 
+     a semi-transparent dark grey to fit the theme better. 
+     Or keep them white if you prefer high contrast. 
+     Here is a 'Glassmorphism' dark style: */
+  background: rgba(255, 255, 255, 0.1); 
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* 1. The "Add New" Card specific styles */
+.add-card {
+  /* Dashed border needs to be lighter now */
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  background-color: transparent;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.add-card:hover {
+  border-color: #007aff;
+  color: #007aff;
+  background-color: rgba(0, 122, 255, 0.1);
+}
+
+.plus-icon {
+  font-size: 3rem;
+  font-weight: 200;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.sub-text {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+/* 2. The "Tour" Card specific styles */
+.tour-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.image-wrapper {
+  flex: 1;
+  overflow: hidden;
+  background: #000;
+}
+
+.image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-footer {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  
+  /* Dark footer for the card */
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tour-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9); /* Light text for card title */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- HEADER STYLES --- */
+.header {
+  height: 64px;
+  width: 100%;
+  background-color: #000; /* Pure black as requested */
+  
+  /* Fixed Position Logic */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Ensures it sits on top of everything */
+  
+  /* Layout Logic */
+  display: flex;
+  justify-content: space-between; /* Pushes Logo left, Icons right */
+  align-items: center;
+  padding: 0 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5); /* Subtle shadow below header */
+}
+
+/* Logo Area */
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  height: 32px;
+  width: 32px;
+  border-radius: 6px;
+}
+
+.logo-text {
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Icons Area */
+.icons {
+  /* This pins the container to the right, exactly like 3DVista */
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  
+  /* This aligns the internal images side-by-side */
+  display: flex;
+  align-items: center;
+  gap: 25px; /* Adds space between the icons */
+}
+
+.icon {
+  /* Increased from 24px to 30px to match the visual weight */
+  height: 30px; 
+  width: auto;
+  
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.icon:hover {
+  opacity: 1;
+  transform: scale(1.05); /* Slight pop effect */
+}
+
+/* --- CONTAINER ADJUSTMENT --- */
+.container {
+  max-width: 1200px;  
+  /* CRITICAL: Push content down so it isn't hidden by the fixed header */
+  padding-top: 85px; 
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+@media (max-width: 400px) {
+  .grid-layout {
+    /* On small phones, use smaller tiles so 2 can fit side-by-side */
+    grid-template-columns: repeat(auto-fill, 140px);
+    
+    /* Or, if you want them centered ONLY on mobile: */
+    justify-content: center; 
+  }
+}
