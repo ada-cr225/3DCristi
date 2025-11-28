@@ -2,85 +2,114 @@ import { useState, useEffect, useRef } from 'react'
 import { db } from './db'
 import './App.css'
 
+// 1. IMPORT THE OFFICIAL ENGINE AND CSS
+import 'pannellum' 
+import 'pannellum/src/css/pannellum.css'
+
+const ICONS = {
+  import: '/import.svg',
+  sort: '/threeLines.svg',
+  cloud: '/cloud.svg',
+  close: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E"
+}
+
 function App() {
   const [tours, setTours] = useState([])
-  // A "Ref" allows us to click the hidden HTML input via code
+  const [activeTour, setActiveTour] = useState(null)
   const fileInputRef = useRef(null)
+  const viewerRef = useRef(null)
 
-  // 1. Load tours from DB on startup
+  // --- DATABASE LOGIC ---
   const loadTours = async () => {
-    // Fetch all items, reverse to show newest first
     const allTours = await db.tours.orderBy('id').reverse().toArray()
-    
-    // Create temporary URLs for previewing images
-    // (Browsers can't display raw 'Blob' data directly in <img> tags)
     const toursWithUrls = allTours.map(tour => ({
       ...tour,
       previewUrl: URL.createObjectURL(tour.fileData)
     }))
-    
     setTours(toursWithUrls)
-  }
-
-  // src/App.jsx (Add this near the top)
-
-  const ICONS = {
-    import: '/import.svg',      // Replaces the old 'install' icon
-    sort: '/threeLines.svg',    // Replaces the old 'sort' icon
-    cloud: '/cloud.svg'
   }
 
   useEffect(() => {
     loadTours()
   }, [])
 
-  // 2. Handle the "Add New" click
-  const handleGridClick = () => {
-    // Trigger the hidden file picker
-    fileInputRef.current.click()
-  }
+  const handleGridClick = () => fileInputRef.current.click()
 
-  // 3. Handle the File Selection
   const handleFileChange = async (event) => {
     const file = event.target.files[0]
     if (!file) return
-
-    // Save to Database
     await db.tours.add({
       name: file.name,
       date: new Date(),
-      fileData: file // Saving the raw binary file
+      fileData: file 
     })
-
-    // Reload the grid
     loadTours()
   }
 
-// inside App() function...
+  // --- VIEWER LOGIC (The Fix) ---
+  useEffect(() => {
+    // Only run this if we have an active tour
+    if (activeTour) {
+      // 1. Initialize the viewer on the div with id "panorama"
+      viewerRef.current = window.pannellum.viewer('panorama', {
+        type: 'equirectangular',
+        panorama: activeTour.previewUrl,
+        autoLoad: true,
+        autoRotate: -2,
+        compass: false,
+        showZoomCtrl: false,
+        showFullscreenCtrl: false,
+        pitch: 10,
+        yaw: 180,
+        hfov: 110
+      });
+    }
 
+    // 2. Cleanup function: Destroy viewer when closing
+    return () => {
+      if (viewerRef.current) {
+        viewerRef.current.destroy();
+        viewerRef.current = null;
+      }
+    }
+  }, [activeTour]) // Re-run whenever activeTour changes
+
+  // --- RENDER ---
+  
+  // VIEW MODE: 360 PLAYER
+  if (activeTour) {
+    return (
+      <div className="viewer-container">
+        <div className="viewer-header">
+           <button className="close-btn" onClick={() => setActiveTour(null)}>
+             <img src={ICONS.close} alt="Close" />
+           </button>
+        </div>
+        
+        {/* THIS ID MUST MATCH THE VIEWER CODE ABOVE */}
+        <div id="panorama" style={{ width: '100%', height: '100vh' }}></div>
+      </div>
+    )
+  }
+
+  // VIEW MODE: GRID
   return (
     <>
-      {/* 1. THE NEW HEADER */}
       <header className="header">
         <div className="logo-area">
           <span className="logo-text">
             3DCristi <span style={{ color: 'rgb(73, 161, 220)' }}>APP</span>
           </span>
         </div>
-        
         <div className="icons">
-          <img className="icon" src={ICONS.import} alt="Install" title="Install App" />
-          <img className="icon" src={ICONS.sort} alt="Sort" title="Sort Tours" />
-          <img className="icon" src={ICONS.cloud} alt="Cloud" title="Connect" />
+          <img className="icon" src={ICONS.import} alt="Import" />
+          <img className="icon" src={ICONS.sort} alt="Sort" />
+          <img className="icon" src={ICONS.cloud} alt="Cloud" />
         </div>
       </header>
 
-      {/* 2. THE MAIN CONTAINER */}
       <div className="container">
-        {/* Removed the old <header> block inside here to save space */}
-        
         <div className="grid-layout">
-          {/* ... Add New Card ... */}
           <div className="card add-card" onClick={handleGridClick}>
             <div className="plus-icon">+</div>
             <p>Create New Tour</p>
@@ -94,9 +123,12 @@ function App() {
             onChange={handleFileChange}
           />
 
-          {/* ... Existing Tours ... */}
           {tours.map((tour) => (
-            <div key={tour.id} className="card tour-card">
+            <div 
+              key={tour.id} 
+              className="card tour-card"
+              onClick={() => setActiveTour(tour)}
+            >
               <div className="image-wrapper">
                 <img src={tour.previewUrl} alt={tour.name} />
               </div>

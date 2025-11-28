@@ -218,6 +218,42 @@ body {
   transform: scale(1.05); /* Slight pop effect */
 }
 
+/* --- VIEWER STYLES --- */
+.viewer-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  background: black;
+}
+
+.viewer-header {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+}
+
+.close-btn {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+}
+
+.close-btn img {
+  width: 24px;
+  height: 24px;
+}
+
 /* --- CONTAINER ADJUSTMENT --- */
 .container {
   max-width: 1200px;  
