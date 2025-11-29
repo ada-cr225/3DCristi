@@ -13,6 +13,15 @@ const ICONS = {
   close: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E"
 }
 
+// --- SPECIAL DEMO CARD DATA ---
+const DEMO_TOUR = {
+  id: 'demo-external',
+  name: 'IMKAN Dashboard',
+  previewUrl: 'https://placehold.co/400x400/222222/FFFFFF/png?text=IMKAN+Demo', 
+  isExternal: true, 
+  externalLink: 'http://dashboard.imkan.ae:8081/webroot/tours/sha/test2/'
+}
+
 function App() {
   const [tours, setTours] = useState([])
   const [activeTour, setActiveTour] = useState(null)
@@ -24,9 +33,12 @@ function App() {
     const allTours = await db.tours.orderBy('id').reverse().toArray()
     const toursWithUrls = allTours.map(tour => ({
       ...tour,
-      previewUrl: URL.createObjectURL(tour.fileData)
+      previewUrl: URL.createObjectURL(tour.fileData),
+      isExternal: false
     }))
-    setTours(toursWithUrls)
+    
+    // Combine them: Put the Demo Tour FIRST
+    setTours([DEMO_TOUR, ...toursWithUrls])
   }
 
   useEffect(() => {
@@ -46,11 +58,9 @@ function App() {
     loadTours()
   }
 
-  // --- VIEWER LOGIC (The Fix) ---
+  // --- VIEWER LOGIC (Only for internal 360 images now) ---
   useEffect(() => {
-    // Only run this if we have an active tour
     if (activeTour) {
-      // 1. Initialize the viewer on the div with id "panorama"
       viewerRef.current = window.pannellum.viewer('panorama', {
         type: 'equirectangular',
         panorama: activeTour.previewUrl,
@@ -65,18 +75,17 @@ function App() {
       });
     }
 
-    // 2. Cleanup function: Destroy viewer when closing
     return () => {
       if (viewerRef.current) {
         viewerRef.current.destroy();
         viewerRef.current = null;
       }
     }
-  }, [activeTour]) // Re-run whenever activeTour changes
+  }, [activeTour])
 
   // --- RENDER ---
   
-  // VIEW MODE: 360 PLAYER
+  // VIEW MODE: 360 PLAYER (Internal only)
   if (activeTour) {
     return (
       <div className="viewer-container">
@@ -85,8 +94,6 @@ function App() {
              <img src={ICONS.close} alt="Close" />
            </button>
         </div>
-        
-        {/* THIS ID MUST MATCH THE VIEWER CODE ABOVE */}
         <div id="panorama" style={{ width: '100%', height: '100vh' }}></div>
       </div>
     )
@@ -127,7 +134,16 @@ function App() {
             <div 
               key={tour.id} 
               className="card tour-card"
-              onClick={() => setActiveTour(tour)}
+              onClick={() => {
+                // THE NEW LOGIC:
+                if (tour.isExternal) {
+                  // If it's the dashboard, go there directly
+                  window.location.href = tour.externalLink;
+                } else {
+                  // If it's a 360 image, open the internal viewer
+                  setActiveTour(tour);
+                }
+              }}
             >
               <div className="image-wrapper">
                 <img src={tour.previewUrl} alt={tour.name} />
